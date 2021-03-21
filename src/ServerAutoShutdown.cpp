@@ -33,12 +33,12 @@ namespace
     // Scheduler - for update
     TaskScheduler scheduler;
 
-    time_t GetLocalHourTimestamp(time_t time, uint8 hour, uint8 minute, uint8 secs)
+    time_t GetNextResetTime(time_t time, uint8 hour, uint8 minute, uint8 second)
     {
         tm timeLocal = TimeBreakdown(time);
         timeLocal.tm_hour = hour;
         timeLocal.tm_min = minute;
-        timeLocal.tm_sec = secs;
+        timeLocal.tm_sec = second;
 
         time_t midnightLocal = mktime(&timeLocal);
 
@@ -46,11 +46,6 @@ namespace
             midnightLocal += DAY;
 
         return midnightLocal;
-    }
-
-    time_t GetNextResetTime(time_t t, uint8 hour, uint8 minute, uint8 second)
-    {
-        return GetLocalHourTimestamp(t, hour, minute, second);
     }
 }
 
