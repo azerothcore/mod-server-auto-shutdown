@@ -23,14 +23,6 @@ ServerAutoShutdown.Enabled = 0
 
 ServerAutoShutdown.Time = "04:00:00"
 
-# 
-#    ServerAutoShutdown.Delay
-#        Description: Restart the server after delay seconds
-#        Default:     10
-#
-
-ServerAutoShutdown.Delay = 10
-
 #
 #    ServerAutoShutdown.PreAnnounce.Delay
 #        Description: Seconds of delay, so the players will be informed about the server restart

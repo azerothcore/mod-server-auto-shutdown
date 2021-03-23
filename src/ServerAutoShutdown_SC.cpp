@@ -19,7 +19,13 @@ public:
         sSAS->OnUpdate(diff);
     }
 
-    void OnAfterConfigLoad(bool /*reload*/) override
+    void OnAfterConfigLoad(bool reload) override
+    {
+        if (reload)
+            sSAS->Init();
+    }
+
+    void OnStartup() override
     {
         sSAS->Init();
     }

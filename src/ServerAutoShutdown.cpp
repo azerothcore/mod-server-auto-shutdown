@@ -103,23 +103,24 @@ void ServerAutoShutdown::Init()
     uint64 nextResetTime = GetNextResetTime(nowTime, hour, minute, second);
     uint32 diffToShutdown = nextResetTime - static_cast<uint32>(nowTime);
 
+    if (diffToShutdown < 10)
+    {
+        sLog->outString("> ServerAutoShutdown: Next time to shutdown < 10 seconds, Set next day", TimeToHumanReadable(nextResetTime).c_str());
+        nextResetTime += DAY;
+    }
+
+    diffToShutdown = nextResetTime - static_cast<uint32>(nowTime);
+
     sLog->outString();
     sLog->outString("> ServerAutoShutdown: System loading");
 
     // Cancel all task for support reload config
     scheduler.CancelAll();
+    sWorld->ShutdownCancel();
 
     sLog->outString("> ServerAutoShutdown: Next time to shutdown - %s", TimeToHumanReadable(nextResetTime).c_str());
     sLog->outString("> ServerAutoShutdown: Remaining time to shutdown - %s", secsToTimeString(diffToShutdown).c_str());
     sLog->outString();
-
-    uint32 shutdownDelay = sConfigMgr->GetOption<uint32>("ServerAutoShutdown.Delay", 10);
-
-    // Add task for shutdown server
-    scheduler.Schedule(Seconds(diffToShutdown), [&](TaskContext /*context*/)
-    {
-        sWorld->ShutdownServ(shutdownDelay, 0, SHUTDOWN_EXIT_CODE);
-    });
 
     uint32 preAnnounceDelay = sConfigMgr->GetOption<uint32>("ServerAutoShutdown.PreAnnounce.Delay", 3600);
     if (preAnnounceDelay > DAY)
@@ -128,18 +129,29 @@ void ServerAutoShutdown::Init()
         preAnnounceDelay = 3600;
     }
 
-    if (diffToShutdown < preAnnounceDelay)
-        return;
-
     uint32 timeToPreAnnounce = static_cast<uint32>(nextResetTime) - preAnnounceDelay;
     uint32 diffToPreAnnounce = timeToPreAnnounce - static_cast<uint32>(nowTime);
+
+    // Ingnore pre announce time and set is left
+    if (diffToShutdown < preAnnounceDelay)
+    {
+        timeToPreAnnounce = static_cast<uint32>(nowTime) + 1;
+        diffToPreAnnounce = 1;
+        preAnnounceDelay = diffToShutdown;
+    }
+
+    /*sLog->outString("> nextResetTime - %lu (%s)", nextResetTime, TimeToHumanReadable(nextResetTime).c_str());
+    sLog->outString("> diffToShutdown - %u", diffToShutdown);
+    sLog->outString("> timeToPreAnnounce - %u (%s)", timeToPreAnnounce, TimeToHumanReadable(timeToPreAnnounce).c_str());
+    sLog->outString("> diffToPreAnnounce - %u", diffToPreAnnounce);
+    sLog->outString("> preAnnounceDelay - %u", preAnnounceDelay);*/
 
     sLog->outString("> ServerAutoShutdown: Next time to pre annouce - %s", TimeToHumanReadable(timeToPreAnnounce).c_str());
     sLog->outString("> ServerAutoShutdown: Remaining time to pre annouce - %s", secsToTimeString(diffToPreAnnounce).c_str());
     sLog->outString();
 
     // Add task for pre shutdown announce
-    scheduler.Schedule(Seconds(diffToPreAnnounce), [&](TaskContext /*context*/)
+    scheduler.Schedule(Seconds(diffToPreAnnounce), [preAnnounceDelay](TaskContext /*context*/)
     {
         std::string preAnnounceMessageFormat = sConfigMgr->GetOption<std::string>("ServerAutoShutdown.PreAnnounce.Message", "[SERVER]: Automated (quick) server restart in %s");
         std::string message = acore::StringFormat(preAnnounceMessageFormat, secsToTimeString(preAnnounceDelay));
@@ -147,6 +159,7 @@ void ServerAutoShutdown::Init()
         sLog->outString("> %s", message.c_str());
 
         sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str());
+        sWorld->ShutdownServ(preAnnounceDelay, 0, SHUTDOWN_EXIT_CODE);
     });
 }
 
