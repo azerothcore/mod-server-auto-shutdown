@@ -159,7 +159,7 @@ void ServerAutoShutdown::Init()
         sLog->outString("> %s", message.c_str());
 
         sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str());
-        sWorld->ShutdownServ(preAnnounceSeconds, 0, SHUTDOWN_EXIT_CODE);
+        sWorld->ShutdownServ(preAnnounceSeconds, SHUTDOWN_MASK_RESTART, SHUTDOWN_EXIT_CODE);
     });
 }
 
