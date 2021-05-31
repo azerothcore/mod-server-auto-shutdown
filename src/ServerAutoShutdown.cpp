@@ -51,7 +51,7 @@ void ServerAutoShutdown::Init()
         return;
 
     std::string configTime = sConfigMgr->GetOption<std::string>("ServerAutoShutdown.Time", "04:00:00");
-    auto const& tokens = acore::Tokenize(configTime, ':', false);
+    auto const& tokens = Acore::Tokenize(configTime, ':', false);
 
     if (tokens.size() != 3)
     {
@@ -65,7 +65,7 @@ void ServerAutoShutdown::Init()
     {
         for (auto const& itr : index)
         {
-            if (acore::StringTo<uint8>(tokens.at(itr)) == std::nullopt)
+            if (Acore::StringTo<uint8>(tokens.at(itr)) == std::nullopt)
                 return false;
         }
 
@@ -79,9 +79,9 @@ void ServerAutoShutdown::Init()
         return;
     }
 
-    uint8 hour = *acore::StringTo<uint8>(tokens.at(0));
-    uint8 minute = *acore::StringTo<uint8>(tokens.at(1));
-    uint8 second = *acore::StringTo<uint8>(tokens.at(2));
+    uint8 hour = *Acore::StringTo<uint8>(tokens.at(0));
+    uint8 minute = *Acore::StringTo<uint8>(tokens.at(1));
+    uint8 second = *Acore::StringTo<uint8>(tokens.at(2));
 
     if (hour > 23)
     {
@@ -154,7 +154,7 @@ void ServerAutoShutdown::Init()
     scheduler.Schedule(Seconds(diffToPreAnnounce), [preAnnounceSeconds](TaskContext /*context*/)
     {
         std::string preAnnounceMessageFormat = sConfigMgr->GetOption<std::string>("ServerAutoShutdown.PreAnnounce.Message", "[SERVER]: Automated (quick) server restart in %s");
-        std::string message = acore::StringFormat(preAnnounceMessageFormat, secsToTimeString(preAnnounceSeconds));
+        std::string message = Acore::StringFormat(preAnnounceMessageFormat, secsToTimeString(preAnnounceSeconds));
 
         sLog->outString("> %s", message.c_str());
 
