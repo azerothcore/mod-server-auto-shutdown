@@ -9,10 +9,10 @@
 // From SC
 void AddSC_ServerAutoShutdown();
 
-// Add all
-void AddServerAutoShutdownScripts()
+// Add all scripts
+void Addmod_server_auto_shutdownScripts()
 {
-   AddSC_ServerAutoShutdown();
+    AddSC_ServerAutoShutdown();
 }
 
 #endif /* _SERVER_AUTO_SHUTDOWN_LOADER_H_ */
