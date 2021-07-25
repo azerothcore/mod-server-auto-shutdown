@@ -3,9 +3,6 @@
  * Copyright (C) 2021+ WarheadCore <https://github.com/WarheadCore>
  */
 
-#ifndef _SERVER_AUTO_SHUTDOWN_LOADER_H_
-#define _SERVER_AUTO_SHUTDOWN_LOADER_H_
-
 // From SC
 void AddSC_ServerAutoShutdown();
 
@@ -14,5 +11,3 @@ void Addmod_server_auto_shutdownScripts()
 {
     AddSC_ServerAutoShutdown();
 }
-
-#endif /* _SERVER_AUTO_SHUTDOWN_LOADER_H_ */
