@@ -131,7 +131,7 @@ void ServerAutoShutdown::Init()
     scheduler.CancelAll();
     sWorld->ShutdownCancel();
 
-    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Next time to shutdown - {}", Acore::Time::TimeToHumanReadable(nextResetTime));
+    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Next time to shutdown - {}", Acore::Time::TimeToHumanReadable(Seconds(nextResetTime)));
     FMT_LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to shutdown - {}", Acore::Time::ToTimeString<Seconds>(diffToShutdown));
     FMT_LOG_INFO("modules", " ");
 
@@ -153,7 +153,7 @@ void ServerAutoShutdown::Init()
         preAnnounceSeconds = diffToShutdown;
     }
 
-    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(timeToPreAnnounce));
+    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(Seconds(timeToPreAnnounce)));
     FMT_LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
     FMT_LOG_INFO("modules", " ");
 
