@@ -67,7 +67,7 @@ void ServerAutoShutdown::Init()
 
     if (tokens.size() != 3)
     {
-        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("module", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
         return;
     }
@@ -86,7 +86,7 @@ void ServerAutoShutdown::Init()
 
     if (!CheckTime({ 0, 1, 2 }))
     {
-        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("module", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
         return;
     }
@@ -97,17 +97,17 @@ void ServerAutoShutdown::Init()
 
     if (hour > 23)
     {
-        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect hour in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("module", "> ServerAutoShutdown: Incorrect hour in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
     }
     else if (minute >= 60)
     {
-        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect minute in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("module", "> ServerAutoShutdown: Incorrect minute in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
     }
     else if (second >= 60)
     {
-        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect second in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("module", "> ServerAutoShutdown: Incorrect second in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
     }
 
@@ -118,27 +118,27 @@ void ServerAutoShutdown::Init()
 
     if (diffToShutdown < 10)
     {
-        LOG_WARN("modules", "> ServerAutoShutdown: Next time to shutdown < 10 seconds, Set next day");
+        LOG_WARN("module", "> ServerAutoShutdown: Next time to shutdown < 10 seconds, Set next day");
         nextResetTime += Days(1).count();
     }
 
     diffToShutdown = nextResetTime - static_cast<uint32>(nowTime);
 
-    LOG_INFO("modules", " ");
-    LOG_INFO("modules","> ServerAutoShutdown: System loading");
+    LOG_INFO("module", " ");
+    LOG_INFO("module","> ServerAutoShutdown: System loading");
 
     // Cancel all task for support reload config
     scheduler.CancelAll();
     sWorld->ShutdownCancel();
 
-    LOG_INFO("modules", "> ServerAutoShutdown: Next time to shutdown - {}", Acore::Time::TimeToHumanReadable(Seconds(nextResetTime)));
-    LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to shutdown - {}", Acore::Time::ToTimeString<Seconds>(diffToShutdown));
-    LOG_INFO("modules", " ");
+    LOG_INFO("module", "> ServerAutoShutdown: Next time to shutdown - {}", Acore::Time::TimeToHumanReadable(Seconds(nextResetTime)));
+    LOG_INFO("module", "> ServerAutoShutdown: Remaining time to shutdown - {}", Acore::Time::ToTimeString<Seconds>(diffToShutdown));
+    LOG_INFO("module", " ");
 
     uint32 preAnnounceSeconds = sConfigMgr->GetOption<uint32>("ServerAutoShutdown.PreAnnounce.Seconds", 3600);
     if (preAnnounceSeconds > Days(1).count())
     {
-        LOG_ERROR("modules", "> ServerAutoShutdown: Ahah, how could this happen? Time to preannouce more 1 day? ({}). Set to 1 hour (3600)", preAnnounceSeconds);
+        LOG_ERROR("module", "> ServerAutoShutdown: Ahah, how could this happen? Time to preannouce more 1 day? ({}). Set to 1 hour (3600)", preAnnounceSeconds);
         preAnnounceSeconds = 3600;
     }
 
@@ -153,9 +153,9 @@ void ServerAutoShutdown::Init()
         preAnnounceSeconds = diffToShutdown;
     }
 
-    LOG_INFO("modules", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(Seconds(timeToPreAnnounce)));
-    LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
-    LOG_INFO("modules", " ");
+    LOG_INFO("module", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(Seconds(timeToPreAnnounce)));
+    LOG_INFO("module", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
+    LOG_INFO("module", " ");
 
     // Add task for pre shutdown announce
     scheduler.Schedule(Seconds(diffToPreAnnounce), [preAnnounceSeconds](TaskContext /*context*/)
@@ -163,7 +163,7 @@ void ServerAutoShutdown::Init()
         std::string preAnnounceMessageFormat = sConfigMgr->GetOption<std::string>("ServerAutoShutdown.PreAnnounce.Message", "[SERVER]: Automated (quick) server restart in %s");
         std::string message = Acore::StringFormat(preAnnounceMessageFormat, Acore::Time::ToTimeString<Seconds>(preAnnounceSeconds, TimeOutput::Seconds, TimeFormat::FullText));
 
-        LOG_INFO("modules", "> {}", message);
+        LOG_INFO("module", "> {}", message);
 
         sWorld->SendServerMessage(SERVER_MSG_STRING, message);
         sWorld->ShutdownServ(preAnnounceSeconds, SHUTDOWN_MASK_RESTART, SHUTDOWN_EXIT_CODE);
