@@ -67,7 +67,7 @@ void ServerAutoShutdown::Init()
 
     if (tokens.size() != 3)
     {
-        FMT_LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
         return;
     }
@@ -86,7 +86,7 @@ void ServerAutoShutdown::Init()
 
     if (!CheckTime({ 0, 1, 2 }))
     {
-        FMT_LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect time in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
         return;
     }
@@ -97,17 +97,17 @@ void ServerAutoShutdown::Init()
 
     if (hour > 23)
     {
-        FMT_LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect hour in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect hour in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
     }
     else if (minute >= 60)
     {
-        FMT_LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect minute in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect minute in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
     }
     else if (second >= 60)
     {
-        FMT_LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect second in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
+        LOG_ERROR("modules", "> ServerAutoShutdown: Incorrect second in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
     }
 
@@ -131,14 +131,14 @@ void ServerAutoShutdown::Init()
     scheduler.CancelAll();
     sWorld->ShutdownCancel();
 
-    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Next time to shutdown - {}", Acore::Time::TimeToHumanReadable(Seconds(nextResetTime)));
-    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to shutdown - {}", Acore::Time::ToTimeString<Seconds>(diffToShutdown));
-    FMT_LOG_INFO("modules", " ");
+    LOG_INFO("modules", "> ServerAutoShutdown: Next time to shutdown - {}", Acore::Time::TimeToHumanReadable(Seconds(nextResetTime)));
+    LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to shutdown - {}", Acore::Time::ToTimeString<Seconds>(diffToShutdown));
+    LOG_INFO("modules", " ");
 
     uint32 preAnnounceSeconds = sConfigMgr->GetOption<uint32>("ServerAutoShutdown.PreAnnounce.Seconds", 3600);
     if (preAnnounceSeconds > Days(1).count())
     {
-        FMT_LOG_ERROR("modules", "> ServerAutoShutdown: Ahah, how could this happen? Time to preannouce more 1 day? ({}). Set to 1 hour (3600)", preAnnounceSeconds);
+        LOG_ERROR("modules", "> ServerAutoShutdown: Ahah, how could this happen? Time to preannouce more 1 day? ({}). Set to 1 hour (3600)", preAnnounceSeconds);
         preAnnounceSeconds = 3600;
     }
 
@@ -153,9 +153,9 @@ void ServerAutoShutdown::Init()
         preAnnounceSeconds = diffToShutdown;
     }
 
-    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(Seconds(timeToPreAnnounce)));
-    FMT_LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
-    FMT_LOG_INFO("modules", " ");
+    LOG_INFO("modules", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(Seconds(timeToPreAnnounce)));
+    LOG_INFO("modules", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
+    LOG_INFO("modules", " ");
 
     // Add task for pre shutdown announce
     scheduler.Schedule(Seconds(diffToPreAnnounce), [preAnnounceSeconds](TaskContext /*context*/)
@@ -163,7 +163,7 @@ void ServerAutoShutdown::Init()
         std::string preAnnounceMessageFormat = sConfigMgr->GetOption<std::string>("ServerAutoShutdown.PreAnnounce.Message", "[SERVER]: Automated (quick) server restart in %s");
         std::string message = Acore::StringFormat(preAnnounceMessageFormat, Acore::Time::ToTimeString<Seconds>(preAnnounceSeconds, TimeOutput::Seconds, TimeFormat::FullText));
 
-        FMT_LOG_INFO("modules", "> {}", message);
+        LOG_INFO("modules", "> {}", message);
 
         sWorld->SendServerMessage(SERVER_MSG_STRING, message);
         sWorld->ShutdownServ(preAnnounceSeconds, SHUTDOWN_MASK_RESTART, SHUTDOWN_EXIT_CODE);
