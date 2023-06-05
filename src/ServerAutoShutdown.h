@@ -27,6 +27,7 @@ public:
 
     void Init();
     void OnUpdate(uint32 diff);
+    void StartPersistentGameEvents();
 
 private:
     bool _isEnableModule = false;
