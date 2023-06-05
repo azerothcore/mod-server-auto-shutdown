@@ -18,6 +18,7 @@
 #include "ServerAutoShutdown.h"
 #include "Config.h"
 #include "Duration.h"
+#include "GameEventMgr.h"
 #include "Language.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -157,6 +158,8 @@ void ServerAutoShutdown::Init()
     LOG_INFO("module", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
     LOG_INFO("module", " ");
 
+    StartPersistentGameEvents();
+
     // Add task for pre shutdown announce
     scheduler.Schedule(Seconds(diffToPreAnnounce), [preAnnounceSeconds](TaskContext /*context*/)
     {
@@ -177,4 +180,26 @@ void ServerAutoShutdown::OnUpdate(uint32 diff)
         return;
 
     scheduler.Update(diff);
+}
+
+void ServerAutoShutdown::StartPersistentGameEvents()
+{
+    std::string eventList = sConfigMgr->GetOption<std::string>("ServerAutoShutdown.StartEvents", "");
+
+    std::vector<std::string_view> tokens = Acore::Tokenize(eventList, ' ', false);
+    GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
+
+    for (auto token : tokens)
+    {
+        if (token.empty())
+        {
+            continue;
+        }
+
+        uint32 eventId = *Acore::StringTo<uint32>(token);
+        sGameEventMgr->StartEvent(eventId);
+
+        GameEventData const& eventData = events[eventId];
+        LOG_INFO("module", "> ServerAutoShutdown: Starting event {} ({}).", eventData.description, eventId);
+    }
 }
