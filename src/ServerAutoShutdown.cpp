@@ -34,7 +34,7 @@ namespace
     // Scheduler - for update
     TaskScheduler scheduler;
 
-    time_t GetNextResetTime(time_t time, uint8 hour, uint8 minute, uint8 second)
+    time_t GetNextResetTime(time_t time, uint32 day, uint8 hour, uint8 minute, uint8 second)
     {
         tm timeLocal = Acore::Time::TimeBreakdown(time);
         timeLocal.tm_hour = hour;
@@ -43,8 +43,8 @@ namespace
 
         time_t midnightLocal = mktime(&timeLocal);
 
-        if (midnightLocal <= time)
-            midnightLocal += DAY;
+        if (day > 1 || midnightLocal <= time)
+            midnightLocal += 86400 * day;
 
         return midnightLocal;
     }
@@ -92,11 +92,17 @@ void ServerAutoShutdown::Init()
         return;
     }
 
+    uint32 day =  sConfigMgr->GetOption<uint32>("ServerAutoShutdown.EveryDays", 1);
     uint8 hour = *Acore::StringTo<uint8>(tokens.at(0));
     uint8 minute = *Acore::StringTo<uint8>(tokens.at(1));
     uint8 second = *Acore::StringTo<uint8>(tokens.at(2));
 
-    if (hour > 23)
+    if (day < 1 || day > 365)
+    {
+        LOG_ERROR("module", "> ServerAutoShutdown: Incorrect day in config option 'ServerAutoShutdown.EveryDays' - '{}'", day);
+        _isEnableModule = false;
+    }
+    else if (hour > 23)
     {
         LOG_ERROR("module", "> ServerAutoShutdown: Incorrect hour in config option 'ServerAutoShutdown.Time' - '{}'", configTime);
         _isEnableModule = false;
@@ -114,16 +120,15 @@ void ServerAutoShutdown::Init()
 
     auto nowTime = time(nullptr);
     //Seconds nowTime = GameTime::GetGameTime();
-    uint64 nextResetTime = GetNextResetTime(nowTime, hour, minute, second);
+    uint64 nextResetTime = GetNextResetTime(nowTime, day, hour, minute, second);
     uint32 diffToShutdown = nextResetTime - static_cast<uint32>(nowTime);
 
     if (diffToShutdown < 10)
     {
         LOG_WARN("module", "> ServerAutoShutdown: Next time to shutdown < 10 seconds, Set next day");
-        nextResetTime += Days(1).count();
+        nextResetTime += 86400 * day;
+        diffToShutdown = nextResetTime - static_cast<uint32>(nowTime);
     }
-
-    diffToShutdown = nextResetTime - static_cast<uint32>(nowTime);
 
     LOG_INFO("module", " ");
     LOG_INFO("module","> ServerAutoShutdown: System loading");
@@ -155,7 +160,7 @@ void ServerAutoShutdown::Init()
     }
 
     LOG_INFO("module", "> ServerAutoShutdown: Next time to pre annouce - {}", Acore::Time::TimeToHumanReadable(Seconds(timeToPreAnnounce)));
-    LOG_INFO("module", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(timeToPreAnnounce));
+    LOG_INFO("module", "> ServerAutoShutdown: Remaining time to pre annouce - {}", Acore::Time::ToTimeString<Seconds>(diffToPreAnnounce));
     LOG_INFO("module", " ");
 
     StartPersistentGameEvents();
