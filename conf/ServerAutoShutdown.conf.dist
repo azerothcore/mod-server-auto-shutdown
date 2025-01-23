@@ -16,6 +16,14 @@
 ServerAutoShutdown.Enabled = 0
 
 #
+#    ServerAutoShutdown.EveryDays
+#        Description: Every these days to automatically shut down the server, need big than 0(at lest 1 day) and less then 366(1 year)
+#        Default:     1 - Every one day
+#
+
+ServerAutoShutdown.EveryDays = 1
+
+#
 #    ServerAutoShutdown.Time
 #        Description: Time (in HH:MM:SS) - 24 hours format
 #        Default:     04:00:00
@@ -25,7 +33,7 @@ ServerAutoShutdown.Time = "04:00:00"
 
 #
 #    ServerAutoShutdown.PreAnnounce.Seconds
-#        Description: Seconds of delay, so the players will be informed about the server restart
+#        Description: Seconds of delay, so the players will be informed about the server restart, less than 86400 second(24 hour)
 #        Default:     3600 (1 hour)
 #
 
